@@ -3,6 +3,9 @@ package BE.example.BE.controller;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,39 +21,45 @@ import jakarta.websocket.server.PathParam;
 @RestController
 public class UserController {
 
-    private final UserService userSevice;
+    private final UserService userService;
 
-    public UserController(UserService userSevice) {
-        this.userSevice = userSevice;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     // GET ALL
-    @GetMapping("/user")
-    public List<User> getAllUser() {
-        return this.userSevice.handleGetUser();
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUser() {
+        return ResponseEntity.ok(this.userService.handleGetUser());
     }
 
     // GET BY ID
-    @GetMapping("/user/{id}")
-    public User getByIdUser(@PathVariable long id) {
-        return this.userSevice.handleGetByIdUser(id);
+    @GetMapping("/users/{id}")
+    public ResponseEntity<User> getByIdUser(@PathVariable long id) {
+        return ResponseEntity.ok(this.userService.handleGetByIdUser(id));
     }
 
     // CREATE
-    @PostMapping("/user")
-    public User createNewUser(@RequestBody User userPostman) {
-        return this.userSevice.handleCreateUser(userPostman);
+    @PostMapping("/users")
+    public ResponseEntity<User> createNewUser(@RequestBody User userPostman) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.handleCreateUser(userPostman));
     }
 
     // UPDATE
-    @PutMapping("/user")
-    public User updateUser(@RequestBody User userUpdatePostman) {
-        return this.userSevice.handleUpdateUser(userUpdatePostman);
+    @PutMapping("/users")
+    public ResponseEntity<User> updateUser(@RequestBody User userUpdatePostman) {
+        return ResponseEntity.status(HttpStatus.OK).body(this.userService.handleUpdateUser(userUpdatePostman));
+
     }
 
-    // DELETE
-    @DeleteMapping("/user/{id}")
-    public boolean deleteUser(@PathVariable long id) {
-        return this.userSevice.handleDeleteUser(id);
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable long id) {
+        boolean deleted = this.userService.handleDeleteUser(id);
+
+        if (deleted) {
+            return ResponseEntity.noContent().build(); // Trả về 204 No Content nếu xoá thành công
+        } else {
+            return ResponseEntity.notFound().build(); // Trả về 404 Not Found nếu không tìm thấy người dùng
+        }
     }
 }
