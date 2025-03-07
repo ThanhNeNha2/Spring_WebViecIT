@@ -20,10 +20,12 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(c -> c.disable())
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/").permitAll() // Cho phép truy cập endpoint "/"
-                        .anyRequest().authenticated() // Các request khác cần xác thực
-                )
+                        // .anyRequest().authenticated()
+                        .anyRequest().permitAll())
+                .formLogin(f -> f.disable())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Không sử dụng session
                 );

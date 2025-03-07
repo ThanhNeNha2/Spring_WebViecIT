@@ -64,4 +64,10 @@ public class UserService {
         return false;
     }
 
+    // Tìm người dùng thông qua email
+    public User HandleGetUserByUserName(String username) {
+
+        return this.userRepository.findByEmail(username);
+    }
+
 }
