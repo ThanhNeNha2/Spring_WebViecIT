@@ -11,17 +11,20 @@ import org.springframework.stereotype.Component;
 import BE.example.BE.domain.User;
 
 @Component("userDetailsService")
-public class UserDetailCustom implements UserDetailsService {
+public class UserDetailsCustom implements UserDetailsService {
 
     private UserService userService;
 
-    public UserDetailCustom(UserService userService) {
+    public UserDetailsCustom(UserService userService) {
         this.userService = userService;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = this.userService.HandleGetUserByUserName(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("Username / password khong hop le ");
+        }
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
     }

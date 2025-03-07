@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import BE.example.BE.Util.error.IdInvalidException;
 import BE.example.BE.domain.User;
 import BE.example.BE.service.UserService;
-import BE.example.BE.service.error.IdInvalidException;
 
 @RestController
 public class UserController {

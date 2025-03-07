@@ -1,4 +1,4 @@
-package BE.example.BE.service.error;
+package BE.example.BE.Util.error;
 
 public class IdInvalidException extends Exception {
     public IdInvalidException(String message) {
