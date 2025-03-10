@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import BE.example.BE.Util.SecurityUtil;
 import BE.example.BE.domain.dto.LoginDTO;
 import jakarta.validation.Valid;
 
@@ -15,9 +16,12 @@ import jakarta.validation.Valid;
 public class AuthController {
 
     private AuthenticationManagerBuilder authenticationManagerBuilder;
+    private SecurityUtil securityUtil;
 
-    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder) {
+    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
+        this.securityUtil = securityUtil;
+
     }
 
     @PostMapping("/login")
@@ -25,6 +29,7 @@ public class AuthController {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 loginDTO.getUsername(), loginDTO.getPassword());
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        this.securityUtil.createToken(authentication);
         return ResponseEntity.ok().body(loginDTO);
     }
 }
