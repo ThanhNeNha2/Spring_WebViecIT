@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import BE.example.BE.Util.SecurityUtil;
 import BE.example.BE.domain.dto.LoginDTO;
+import BE.example.BE.domain.dto.ResLoginDTO;
 import jakarta.validation.Valid;
 
 @RestController
@@ -25,11 +26,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginDTO> login(@Valid @RequestBody LoginDTO loginDTO) {
+    public ResponseEntity<ResLoginDTO> login(@Valid @RequestBody LoginDTO loginDTO) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 loginDTO.getUsername(), loginDTO.getPassword());
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        this.securityUtil.createToken(authentication);
-        return ResponseEntity.ok().body(loginDTO);
+        String access_Token = this.securityUtil.createToken(authentication);
+        ResLoginDTO res = new ResLoginDTO();
+        res.setAccessToken(access_Token);
+        return ResponseEntity.ok().body(res);
     }
 }
