@@ -40,17 +40,19 @@ public class SecurityConfiguration {
             CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
         http
                 .csrf(c -> c.disable())
+                .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/", "/login").permitAll() // Cho phép truy cập endpoint "/"
                         .anyRequest().authenticated()
                 // .anyRequest().permitAll()
                 )
-                .exceptionHandling(
-                        exceptions -> exceptions
-                                .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
-                                .accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
+
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
+                // .exceptionHandling(
+                // exceptions -> exceptions
+                // .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
+                // .accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
                 .formLogin(f -> f.disable())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Không sử dụng session
@@ -95,7 +97,6 @@ public class SecurityConfiguration {
             } catch (Exception e) {
                 System.out.println(" >>> JWT error: " + e.getMessage());
                 throw e;
-                // TODO: handle exception
             }
         };
     }
