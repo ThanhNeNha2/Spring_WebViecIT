@@ -1,0 +1,39 @@
+package BE.example.BE.config;
+
+import java.io.IOException;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import BE.example.BE.domain.RestResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+@Component
+public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+    private final AuthenticationEntryPoint delegate = new BearerTokenAuthenticationEntryPoint();
+    private final ObjectMapper mapper;
+
+    public CustomAuthenticationEntryPoint(ObjectMapper mapper) {
+        this.mapper = mapper;
+    }
+
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response,
+            AuthenticationException authenException) throws IOException, ServletException {
+        this.delegate.commence(request, response, authenException);
+        response.setContentType("application/json;charset=utf-8");
+
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+        res.setError(authenException.getCause().getMessage());
+        res.setMessage("Token khong hop le ( het han hoac  khong dung dinh dang )");
+        mapper.writeValue(response.getWriter(), res);
+    }
+}
