@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.turkraft.springfilter.boot.Filter;
 
 import BE.example.BE.Util.error.IdInvalidException;
 import BE.example.BE.domain.User;
@@ -35,12 +38,13 @@ public class UserController {
     // GET ALL
     @GetMapping("/users")
     public ResponseEntity<ResultPaginationDTO> getAllUser(
-            @RequestParam("current") String current,
-            @RequestParam("pageSize") String pageSize) {
+            @Filter Specification<User> spec) {
 
-        Pageable page = PageRequest.of(Integer.parseInt(current) - 1, Integer.parseInt(pageSize));
-        return ResponseEntity.ok(this.userService.handleGetUser(page));
+        return ResponseEntity.ok(this.userService.handleGetUser(spec));
     }
+
+    // Pageable page = PageRequest.of(Integer.parseInt(current) - 1,
+    // Integer.parseInt(pageSize));
 
     // GET BY ID
     @GetMapping("/users/{id}")

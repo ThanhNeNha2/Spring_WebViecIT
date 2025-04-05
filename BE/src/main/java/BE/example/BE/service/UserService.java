@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import BE.example.BE.domain.User;
@@ -27,22 +28,24 @@ public class UserService {
     }
 
     // Get
-    public ResultPaginationDTO handleGetUser(Pageable pageable) {
-        Page<User> litsUser = this.userRepository.findAll(pageable);
+    public ResultPaginationDTO handleGetUser(Specification<User> specification) {
+        List<User> litsUser = this.userRepository.findAll(specification);
         ResultPaginationDTO rs = new ResultPaginationDTO();
         Meta meta = new Meta();
-        // trang đang đứng
-        meta.setPage(litsUser.getNumber());
-        // số phần tử muốn lấy
-        meta.setPageSize(litsUser.getSize());
-        // tổng số trang có trong danh sách
-        meta.setPages(litsUser.getTotalPages());
-        // tổng số phần tử có trong danh sách
-        meta.setTotal(litsUser.getTotalElements());
+
         rs.setMeta(meta);
-        rs.setResult(litsUser.getContent());
+        rs.setResult(litsUser);
         return rs;
     }
+
+    // // trang đang đứng ( + 1 vì nó lấy giá trị trang từ 0 )
+    // meta.setPage(litsUser.getNumber() + 1);
+    // // số phần tử muốn lấy
+    // meta.setPageSize(litsUser.getSize());
+    // // tổng số trang có trong danh sách
+    // meta.setPages(litsUser.getTotalPages());
+    // // tổng số phần tử có trong danh sách
+    // meta.setTotal(litsUser.getTotalElements());
 
     // Get by id
     // *** C1
