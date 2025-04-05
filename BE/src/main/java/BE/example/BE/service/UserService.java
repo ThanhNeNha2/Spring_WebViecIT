@@ -3,9 +3,13 @@ package BE.example.BE.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import BE.example.BE.domain.User;
+import BE.example.BE.domain.dto.Meta;
+import BE.example.BE.domain.dto.ResultPaginationDTO;
 import BE.example.BE.repository.UserRepository;
 
 @Service
@@ -23,8 +27,21 @@ public class UserService {
     }
 
     // Get
-    public List<User> handleGetUser() {
-        return this.userRepository.findAll();
+    public ResultPaginationDTO handleGetUser(Pageable pageable) {
+        Page<User> litsUser = this.userRepository.findAll(pageable);
+        ResultPaginationDTO rs = new ResultPaginationDTO();
+        Meta meta = new Meta();
+        // trang đang đứng
+        meta.setPage(litsUser.getNumber());
+        // số phần tử muốn lấy
+        meta.setPageSize(litsUser.getSize());
+        // tổng số trang có trong danh sách
+        meta.setPages(litsUser.getTotalPages());
+        // tổng số phần tử có trong danh sách
+        meta.setTotal(litsUser.getTotalElements());
+        rs.setMeta(meta);
+        rs.setResult(litsUser.getContent());
+        return rs;
     }
 
     // Get by id

@@ -35,9 +35,11 @@ public class CompanyController {
     // GET
     @GetMapping("/companies")
     public ResponseEntity<List<Company>> getAllCompany() {
+
         return ResponseEntity.ok(this.companyService.handleGetAllCompanies());
     }
 
+    // GET BY ID
     @GetMapping("/companies/{id}")
     public ResponseEntity<Company> getCompanyById(@PathVariable("id") long id) {
         Optional<Company> company = this.companyService.handleGetByIdCompany(id);
