@@ -38,9 +38,9 @@ public class UserController {
     // GET ALL
     @GetMapping("/users")
     public ResponseEntity<ResultPaginationDTO> getAllUser(
-            @Filter Specification<User> spec) {
+            @Filter Specification<User> spec, Pageable pageable) {
 
-        return ResponseEntity.ok(this.userService.handleGetUser(spec));
+        return ResponseEntity.ok(this.userService.handleGetUser(spec, pageable));
     }
 
     // Pageable page = PageRequest.of(Integer.parseInt(current) - 1,

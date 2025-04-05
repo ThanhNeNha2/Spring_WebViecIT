@@ -28,24 +28,23 @@ public class UserService {
     }
 
     // Get
-    public ResultPaginationDTO handleGetUser(Specification<User> specification) {
-        List<User> litsUser = this.userRepository.findAll(specification);
+    public ResultPaginationDTO handleGetUser(Specification<User> specification, Pageable pageable) {
+        Page<User> litsUser = this.userRepository.findAll(specification, pageable);
         ResultPaginationDTO rs = new ResultPaginationDTO();
         Meta meta = new Meta();
 
+        // // trang đang đứng ( + 1 vì nó lấy giá trị trang từ 0 )
+        meta.setPage(litsUser.getNumber() + 1);
+        // // số phần tử muốn lấy
+        meta.setPageSize(litsUser.getSize());
+        // // tổng số trang có trong danh sách
+        meta.setPages(litsUser.getTotalPages());
+        // // tổng số phần tử có trong danh sách
+        meta.setTotal(litsUser.getTotalElements());
         rs.setMeta(meta);
-        rs.setResult(litsUser);
+        rs.setResult(litsUser.getContent());
         return rs;
     }
-
-    // // trang đang đứng ( + 1 vì nó lấy giá trị trang từ 0 )
-    // meta.setPage(litsUser.getNumber() + 1);
-    // // số phần tử muốn lấy
-    // meta.setPageSize(litsUser.getSize());
-    // // tổng số trang có trong danh sách
-    // meta.setPages(litsUser.getTotalPages());
-    // // tổng số phần tử có trong danh sách
-    // meta.setTotal(litsUser.getTotalElements());
 
     // Get by id
     // *** C1
