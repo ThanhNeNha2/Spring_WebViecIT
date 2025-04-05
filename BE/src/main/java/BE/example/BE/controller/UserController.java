@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.turkraft.springfilter.boot.Filter;
 
+import BE.example.BE.Util.annotation.ApiMessage;
 import BE.example.BE.Util.error.IdInvalidException;
 import BE.example.BE.domain.User;
 import BE.example.BE.domain.dto.ResultPaginationDTO;
@@ -36,6 +37,7 @@ public class UserController {
     }
 
     // GET ALL
+    @ApiMessage("Fetch all user")
     @GetMapping("/users")
     public ResponseEntity<ResultPaginationDTO> getAllUser(
             @Filter Specification<User> spec, Pageable pageable) {

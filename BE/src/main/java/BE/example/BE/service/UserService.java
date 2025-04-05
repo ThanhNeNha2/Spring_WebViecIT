@@ -34,9 +34,9 @@ public class UserService {
         Meta meta = new Meta();
 
         // // trang đang đứng ( + 1 vì nó lấy giá trị trang từ 0 )
-        meta.setPage(litsUser.getNumber() + 1);
+        meta.setPage(pageable.getPageNumber() + 1);
         // // số phần tử muốn lấy
-        meta.setPageSize(litsUser.getSize());
+        meta.setPageSize(pageable.getPageSize());
         // // tổng số trang có trong danh sách
         meta.setPages(litsUser.getTotalPages());
         // // tổng số phần tử có trong danh sách
