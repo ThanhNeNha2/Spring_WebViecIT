@@ -24,8 +24,11 @@ import BE.example.BE.Util.error.IdInvalidException;
 import BE.example.BE.domain.User;
 import BE.example.BE.domain.dto.ResultPaginationDTO;
 import BE.example.BE.service.UserService;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 @RestController
+@RequestMapping("/api/v1")
 public class UserController {
 
     private final UserService userService;
