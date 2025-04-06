@@ -2,15 +2,23 @@ package BE.example.BE.Util;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.context.SecurityContext;
 
 @Service
 public class SecurityUtil {
@@ -38,4 +46,60 @@ public class SecurityUtil {
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
         return this.jwtEnCoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
     }
+
+    // Lấy thông tin user đã lưu từ trước khi đăng nhập ra
+
+    public static Optional<String> getCurrentUserLogin() {
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        return Optional.ofNullable(extractPrincipal(securityContext.getAuthentication()));
+    }
+
+    private static String extractPrincipal(Authentication authentication) {
+        if (authentication == null) {
+            return null;
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof UserDetails) {
+            return ((UserDetails) principal).getUsername();
+        } else if (principal instanceof Jwt) {
+            return ((Jwt) principal).getSubject();
+        } else if (principal instanceof String) {
+            return (String) principal;
+        }
+
+        return null;
+    }
+
+    public static Optional<String> getCurrentUserJWT() {
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        return Optional.ofNullable(securityContext.getAuthentication())
+                .filter(authentication -> authentication.getCredentials() instanceof String)
+                .map(authentication -> (String) authentication.getCredentials());
+    }
+
+    // public static boolean isAuthenticated() {
+    // Authentication authentication =
+    // SecurityContextHolder.getContext().getAuthentication();
+    // return authentication != null && getAuthorities(authentication)
+    // .noneMatch(AuthoritiesConstants.ANONYMOUS::equals);
+    // }
+
+    // public static boolean hasCurrentUserAnyOfAuthorities(String... authorities) {
+    // Authentication authentication =
+    // SecurityContextHolder.getContext().getAuthentication();
+    // return authentication != null && getAuthorities(authentication)
+    // .anyMatch(authority -> Arrays.asList(authorities).contains(authority));
+    // }
+
+    // public static boolean hasCurrentUserNoneOfAuthorities(String... authorities)
+    // {
+    // return !hasCurrentUserAnyOfAuthorities(authorities);
+    // }
+
+    // private static Stream<String> getAuthorities(Authentication authentication) {
+    // return authentication.getAuthorities().stream()
+    // .map(GrantedAuthority::getAuthority);
+    // }
 }
