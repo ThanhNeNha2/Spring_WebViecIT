@@ -42,7 +42,7 @@ public class SecurityConfiguration {
                 .csrf(c -> c.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/", "/login").permitAll() // Cho phép truy cập endpoint "/"
+                        .requestMatchers("/", "/api/v1/login").permitAll() // Cho phép truy cập endpoint "/"
                         .anyRequest().authenticated()
                 // .anyRequest().permitAll()
                 )

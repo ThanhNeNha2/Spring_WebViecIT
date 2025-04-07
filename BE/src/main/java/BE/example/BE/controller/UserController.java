@@ -22,8 +22,13 @@ import com.turkraft.springfilter.boot.Filter;
 import BE.example.BE.Util.annotation.ApiMessage;
 import BE.example.BE.Util.error.IdInvalidException;
 import BE.example.BE.domain.User;
+import BE.example.BE.domain.dto.ResCreateUserDTO;
+import BE.example.BE.domain.dto.ResUpdateUserDTO;
+import BE.example.BE.domain.dto.ResUserDTO;
 import BE.example.BE.domain.dto.ResultPaginationDTO;
 import BE.example.BE.service.UserService;
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -44,46 +49,54 @@ public class UserController {
     @GetMapping("/users")
     public ResponseEntity<ResultPaginationDTO> getAllUser(
             @Filter Specification<User> spec, Pageable pageable) {
-
         return ResponseEntity.ok(this.userService.handleGetUser(spec, pageable));
     }
 
-    // Pageable page = PageRequest.of(Integer.parseInt(current) - 1,
-    // Integer.parseInt(pageSize));
-
     // GET BY ID
     @GetMapping("/users/{id}")
-    public ResponseEntity<User> getByIdUser(@PathVariable long id) {
-        return ResponseEntity.ok(this.userService.handleGetByIdUser(id));
+    public ResponseEntity<ResUserDTO> getByIdUser(@PathVariable("id") long id) throws IdInvalidException {
+        User existingUser = this.userService.handleGetByIdUser(id);
+        if (existingUser == null) {
+            throw new IdInvalidException("ID " + id + " không tồn tại !");
+        }
+        return ResponseEntity.ok(this.userService.convertResGetById(existingUser));
     }
 
     // CREATE
     @PostMapping("/users")
-    public ResponseEntity<User> createNewUser(@RequestBody User userPostman) {
+    @ApiMessage("Create user")
+    public ResponseEntity<ResCreateUserDTO> createNewUser(@Valid @RequestBody User userPostman)
+            throws IdInvalidException {
+        if (this.userService.checkEmailExits(userPostman.getEmail())) {
+            throw new IdInvalidException("Email " + userPostman.getEmail() + " đã tồn tại !");
+        }
         String hassPass = this.passwordEncoder.encode(userPostman.getPassword());
         userPostman.setPassword(hassPass);
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.handleCreateUser(userPostman));
+        User user = this.userService.handleCreateUser(userPostman);
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.convertRes(user));
     }
 
     // UPDATE
     @PutMapping("/users")
-    public ResponseEntity<User> updateUser(@RequestBody User userUpdatePostman) {
-        return ResponseEntity.status(HttpStatus.OK).body(this.userService.handleUpdateUser(userUpdatePostman));
-
+    public ResponseEntity<ResUpdateUserDTO> updateUser(@RequestBody User userUpdatePostman) throws IdInvalidException {
+        User existingUser = this.userService.handleGetByIdUser(userUpdatePostman.getId());
+        if (existingUser == null) {
+            throw new IdInvalidException("ID " + userUpdatePostman.getId() + " không tồn tại !");
+        }
+        User userupdate = this.userService.handleUpdateUser(userUpdatePostman);
+        return ResponseEntity.status(HttpStatus.OK).body(this.userService.convertResUpdate(userupdate));
     }
 
     // DELETE
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable long id) throws IdInvalidException {
-        if (id >= 1500) {
-            throw new IdInvalidException("Id không đúng định dạng ");
-        }
+    public ResponseEntity<String> deleteUser(@PathVariable("id") long id) throws IdInvalidException {
         boolean deleted = this.userService.handleDeleteUser(id);
 
         if (deleted) {
-            return ResponseEntity.noContent().build(); // Trả về 204 No Content nếu xoá thành công
+            return ResponseEntity.ok("Xóa thành công");
         } else {
-            return ResponseEntity.notFound().build(); // Trả về 404 Not Found nếu không tìm thấy người dùng
+            throw new IdInvalidException("ID " + id + " không tồn tại !");
         }
     }
+
 }

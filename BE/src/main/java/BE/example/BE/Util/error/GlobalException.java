@@ -13,21 +13,43 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import BE.example.BE.domain.RestResponse;
 
 @RestControllerAdvice
 public class GlobalException {
     @ExceptionHandler(value = {
-
             UsernameNotFoundException.class,
-            BadCredentialsException.class
+            BadCredentialsException.class,
+            IdInvalidException.class
     })
+
     public ResponseEntity<RestResponse<Object>> handleIdException(IdInvalidException ex) {
         RestResponse<Object> res = new RestResponse<Object>();
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
         res.setError(ex.getMessage());
         res.setMessage("Exception occurs....");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+
+    // CHECK NẾU LỖI KHÔNG TÌM THẤY ĐƯỜNG LINK URL API
+    @ExceptionHandler(value = {
+            NoResourceFoundException.class
+    })
+    public ResponseEntity<RestResponse<Object>> handleNotFoundException(Exception ex) {
+        RestResponse<Object> res = new RestResponse<>();
+
+        // Thiết lập mã trạng thái là 404 Not Found
+        res.setStatusCode(HttpStatus.NOT_FOUND.value());
+
+        // Thiết lập thông báo lỗi từ exception
+        res.setError(ex.getMessage());
+
+        // Thiết lập thông báo người dùng
+        res.setMessage("404 Not Found. URL may not exist...");
+
+        // Trả về ResponseEntity với mã trạng thái BAD_REQUEST (400)
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
 
