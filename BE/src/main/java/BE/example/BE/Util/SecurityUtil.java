@@ -18,6 +18,9 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
+
+import BE.example.BE.domain.dto.ResLoginDTO;
+
 import org.springframework.security.core.context.SecurityContext;
 
 @Service
@@ -29,15 +32,19 @@ public class SecurityUtil {
     }
 
     public static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS512;
+
     @Value("${be.jwt.base64-secret}")
     private String jwtKey;
 
-    @Value("${be.jwt.token-validity-in-seconds}")
-    private long jwtExpiration;
+    @Value("${be.jwt.access-token-validity-in-seconds}")
+    private long accessTokenExpiration;
 
-    public String createToken(Authentication authentication) {
+    @Value("${be.jwt.refresh-token-validity-in-seconds}")
+    private long refreshTokenExpiration;
+
+    public String createAccessToken(Authentication authentication) {
         Instant now = Instant.now();
-        Instant validity = now.plus(this.jwtExpiration, ChronoUnit.SECONDS);
+        Instant validity = now.plus(this.accessTokenExpiration, ChronoUnit.SECONDS);
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now).expiresAt(validity)
                 .subject(authentication.getName())
@@ -47,8 +54,20 @@ public class SecurityUtil {
         return this.jwtEnCoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
     }
 
-    // Lấy thông tin user đã lưu từ trước khi đăng nhập ra
+    public String createRefreshToken(String email, ResLoginDTO dto) {
+        Instant now = Instant.now();
+        Instant validity = now.plus(this.refreshTokenExpiration, ChronoUnit.SECONDS);
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuedAt(now).expiresAt(validity)
+                // getName này là tên đăng nhập ( email )
+                .subject(email)
+                .claim("chithanh", dto.getUser())
+                .build();
+        JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
+        return this.jwtEnCoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
+    }
 
+    // Lấy thông tin user đã lưu từ trước khi đăng nhập ra
     public static Optional<String> getCurrentUserLogin() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         return Optional.ofNullable(extractPrincipal(securityContext.getAuthentication()));

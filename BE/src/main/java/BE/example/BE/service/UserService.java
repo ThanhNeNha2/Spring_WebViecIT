@@ -152,4 +152,11 @@ public class UserService {
         return this.userRepository.findByEmail(username);
     }
 
+    public void updateUserToken(String token, String email) {
+        User usercheck = this.HandleGetUserByUserName(email);
+        if (usercheck != null) {
+            usercheck.setRefreshToken(token);
+            this.userRepository.save(usercheck);
+        }
+    }
 }
