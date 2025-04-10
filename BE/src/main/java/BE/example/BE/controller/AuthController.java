@@ -46,16 +46,22 @@ public class AuthController {
         public ResponseEntity<ResLoginDTO> login(@Valid @RequestBody LoginDTO loginDTO) {
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                                 loginDTO.getUsername(), loginDTO.getPassword());
+                // xác thực người dùng => cần viết hàm loadUserByUserName
                 Authentication authentication = authenticationManagerBuilder.getObject()
                                 .authenticate(authenticationToken);
+                // set thong tin người dùng đăng nhập vào con text để sử dụng cho sau này
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 User resUser = this.userService.HandleGetUserByUserName(loginDTO.getUsername());
                 ResLoginDTO res = new ResLoginDTO();
                 ResLoginDTO.UserLogin user = new ResLoginDTO.UserLogin(resUser.getId(), resUser.getName(),
                                 resUser.getEmail());
                 res.setUser(user);
+
+                // create access_token
                 String access_Token = this.securityUtil.createAccessToken(authentication, res.getUser());
                 res.setAccessToken(access_Token);
+
+                // create refresh_token
                 String refresh_token = this.securityUtil.createRefreshToken(loginDTO.getUsername(), res);
                 this.userService.updateUserToken(refresh_token, loginDTO.getUsername());
                 ResponseCookie responseCookie = ResponseCookie
@@ -70,6 +76,7 @@ public class AuthController {
                                 .body(res);
         }
 
+        //
         @GetMapping("/auth/account")
         @ApiMessage("Fetch account")
         public ResponseEntity<ResLoginDTO.UserLogin> getAccount() {

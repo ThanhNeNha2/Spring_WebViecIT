@@ -2,7 +2,9 @@ package BE.example.BE.Util;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -42,18 +44,26 @@ public class SecurityUtil {
     @Value("${be.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpiration;
 
+    // Tạo access_Token
     public String createAccessToken(Authentication authentication, ResLoginDTO.UserLogin dto) {
         Instant now = Instant.now();
         Instant validity = now.plus(this.accessTokenExpiration, ChronoUnit.SECONDS);
+
+        List<String> listAuthority = new ArrayList<>();
+        listAuthority.add("ROLE_USER_CREATE");
+        listAuthority.add("ROLE_USER_UPDATE");
+
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now).expiresAt(validity)
                 .subject(authentication.getName())
                 .claim("user", dto)
+                .claim("permission", listAuthority)
                 .build();
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
         return this.jwtEnCoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
     }
 
+    // Tạo refresh_token
     public String createRefreshToken(String email, ResLoginDTO dto) {
         Instant now = Instant.now();
         Instant validity = now.plus(this.refreshTokenExpiration, ChronoUnit.SECONDS);
